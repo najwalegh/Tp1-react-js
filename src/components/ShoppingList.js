@@ -1,17 +1,30 @@
-import React ,{useState}from 'react'
+import React ,{useState, useEffect}from 'react'
 import { plantList } from '../plantsList'
+import axios from 'axios';
 import PlantItem from './PlantItem'
 import Category from './Category'
 
 function ShoppingList({ cart, updateCart }) {
   const [activeCategory, setActiveCategory] = useState('');
-  const categories=plantList.reduce(
-    (acc,plant)=>
-      acc.includes(plant.category) ? acc : acc.concat(plant.category),
-      []
-    )
+  const [plants, setPlants] = useState([]);
+ 
 
-    
+    useEffect(() => {
+      // Utiliser Axios pour obtenir les données depuis l'API
+      axios.get('http://localhost:8080/api/tutorials')
+        .then(response => {
+          setPlants(response.data); // Définir les données récupérées dans l'état
+        })
+        .catch(error => {
+          console.error('Erreur lors de la récupération des données:', error);
+        });
+    }, []);
+
+    const categories = plants.reduce(
+      (acc, plant) =>
+        acc.includes(plant.category) ? acc : acc.concat(plant.category),
+      []
+    );
 
   return (
     <div style={{
@@ -25,13 +38,13 @@ function ShoppingList({ cart, updateCart }) {
           display:'flex',
           flexWrap: 'wrap',
           }}>
-          {plantList.map((plant)=>
+          {plants.map((plant)=>
           !activeCategory || activeCategory === plant.category ? (
             <>
                   <PlantItem 
                   category={plant.category}
                   name={plant.name}
-                  cover={plant.cover}
+                  cover={require(`../assets/${plant.cover}.jpg`)}
                   water={plant.water}
                   light={plant.light}
                   price={plant.price} 
